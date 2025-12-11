@@ -8,9 +8,12 @@ const {
   ButtonBuilder,
   ButtonStyle,
   MessageFlags,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
 } = require("discord.js");
 const betterSQL = require("better-sqlite3");
 const { rules } = require("./files/rules-content");
+const { guide } = require("./files/guide-content");
 
 // Load Environment file.
 process.loadEnvFile(".env");
@@ -71,7 +74,7 @@ client.on("messageCreate", async (message) => {
 
     const args = getArguments(message.content);
 
-    if (!args.uid.at(0) || !args.tof.at(0))
+    if (!args.uid.at(0) || args.tof.at(0) === undefined)
       return message.reply(":x: )- UID(1!) || TOF(1!)");
 
     const member = await guild.members.fetch(args.uid[0]);
@@ -119,36 +122,73 @@ client.on("messageCreate", async (message) => {
     const button_row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("info-rules")
-        .setStyle(ButtonStyle.Success)
+        .setStyle(ButtonStyle.Secondary)
         .setLabel("Rules")
-        .setEmoji({ id: "1448023325581508739" }),
+        .setEmoji({ id: "1448672796707389482" }),
+      new ButtonBuilder()
+        .setCustomId("info-guide")
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("Guide")
+        .setEmoji({ id: "1448672735201984597" }),
+    );
+
+    const select_row = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId("info-select")
+        .setPlaceholder("More informations...")
+        .setMaxValues(1)
+        .addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Moderation Guide")
+            .setDescription("Information about moderation infractions.")
+            .setEmoji({ id: "1448675316875919466" })
+            .setValue("mod-guide"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Levels & Perks")
+            .setDescription(
+              "Information about levels and the perks given by levels.",
+            )
+            .setEmoji({ id: "1448675545696178300" })
+            .setValue("level-perks"),
+        ),
     );
 
     const channel = await guild.channels.fetch(args.cid[0]);
     if (!channel) message.reply(":x: )- CID channel not found.");
     return channel.send({
       embeds: [header_image, main_embed],
-      components: [button_row],
+      components: [button_row, select_row],
       files: [attachment],
     });
   }
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if (interaction.customId === "info-rules") {
-    const embed = new EmbedBuilder()
-      .setTitle("Server Rules")
-      .setDescription(rules)
+  if (interaction.isButton()) {
+    if (interaction.customId === "info-rules") {
+      const embed = new EmbedBuilder()
+        .setTitle("<:guidelines_tts:1448672796707389482> Policies & Rules")
+        .setDescription(rules)
+        .setColor("2C2F33");
+
+      const footer_embed = new EmbedBuilder().setDescription(
+        `<:punishment:1448675316875919466> **NOTE: You are expected to follow the rules listed above.**\n> If you have any questions regarding a rule ask a moderator.`,
+      );
+
+      return interaction.reply({
+        embeds: [embed, footer_embed],
+        flags: [MessageFlags.Ephemeral],
+      });
+    } else if (interaction.customId === "info-guide") {
+      const embed = new EmbedBuilder()
+      .setDescription(guide)
       .setColor("2C2F33");
 
-    const footer_embed = new EmbedBuilder().setDescription(
-      `**NOTE: You are expected to follow the rules listed above.**\n> If you have any questions regarding a rule ask a moderator.`,
-    );
-
-    interaction.reply({
-      embeds: [embed, footer_embed],
-      flags: [MessageFlags.Ephemeral],
-    });
+      interaction.reply({ 
+        embeds: [embed],
+        flags: [MessageFlags.Ephemeral]
+      })
+    }
   }
 });
 
@@ -221,15 +261,15 @@ function findOrInsertUser(userId, optionals = { whitelisted: 0 }) {
 }
 
 process.on("uncaughtException", (error, origin) => {
-    console.error(error, origin);
+  console.error(error, origin);
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-    console.error(reason, promise);
+  console.error(reason, promise);
 });
 
 client.on("error", (error) => {
-    console.error(error);
+  console.error(error);
 });
 
 client.login(process.env.TOKEN);
