@@ -14,6 +14,7 @@ const {
 const betterSQL = require("better-sqlite3");
 const { rules } = require("./files/rules-content");
 const { guide } = require("./files/guide-content");
+const { perks } = require("./files/level-perks");
 
 // Load Environment file.
 process.loadEnvFile(".env");
@@ -180,14 +181,43 @@ client.on("interactionCreate", async (interaction) => {
         flags: [MessageFlags.Ephemeral],
       });
     } else if (interaction.customId === "info-guide") {
-      const embed = new EmbedBuilder()
-      .setDescription(guide)
-      .setColor("2C2F33");
+      const embed = new EmbedBuilder().setDescription(guide).setColor("2C2F33");
 
-      interaction.reply({ 
+      return interaction.reply({
         embeds: [embed],
-        flags: [MessageFlags.Ephemeral]
-      })
+        flags: [MessageFlags.Ephemeral],
+      });
+    }
+  }
+
+  if (interaction.isStringSelectMenu()) {
+    if (interaction.customId === "info-select") {
+      const selected = interaction.values[0];
+
+      if (selected === "mod-guide") {
+        const embed = new EmbedBuilder()
+          .setTitle(
+            "<:moderation:1448675316875919466> Moderation Infractions Guide",
+          )
+          .setDescription("empty for now")
+          .setColor("2C2F33");
+
+        return interaction.reply({
+          embeds: [embed],
+          flags: [MessageFlags.Ephemeral],
+        });
+      }
+
+      if (selected === "level-perks") {
+        const embed = new EmbedBuilder()
+          .setDescription(perks)
+          .setColor("2C2F33");
+
+        return interaction.reply({
+          embeds: [embed],
+          flags: [MessageFlags.Ephemeral],
+        });
+      }
     }
   }
 });

@@ -38,4 +38,4 @@ module.exports.guide = `
 > **You can also find other cool people like you that join our server!**
 
 - <#1445857052277866548>
-`
+`;
