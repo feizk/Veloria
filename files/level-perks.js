@@ -1,21 +1,27 @@
 module.exports.perks = `
-# <:level_8:1448675545696178300> Level Perks
+# Level Perks
 
-> <@&1445856996128461041> 
-- Ability to share links with embedded content
+> **Level 5**
+- <@&1445856996128461041> 
+- Ability to use external emojis, stickers, sounds, and ability to share links with embedded content
 
-> <@&1445856994937536666> 
-- Ability to use external emojis, stickers, and sounds
+> **Level 10**
+- <@&1445856994937536666> 
+- Change your nickname 
 
- > <@&1445856994236960909> 
-- Change your nickname
+ > **Level 20**
+- <@&1445856994236960909> 
+-  Eligible for applying to staff
 
-> <@&1445856993301758106> 
+> **Level 30**
+- <@&1445856993301758106> 
 - Create Private thread
 
-> <@&1445856992328548453> 
+> **Level 40**
+- <@&1445856992328548453> 
 - Create Expressions
 
-> <@&1445856992328548453> 
+> **Level 50**
+- <@&1445856991154147328> 
 - Custom Role
 `;

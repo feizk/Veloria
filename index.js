@@ -10,6 +10,8 @@ const {
   MessageFlags,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
+  codeBlock,
+  WebhookClient,
 } = require("discord.js");
 const betterSQL = require("better-sqlite3");
 const { rules } = require("./files/rules-content");
@@ -28,10 +30,9 @@ const client = new Client({
   ],
 });
 
+const clientId = "1448012671726125117";
 const owners = ["1143607268781342893"];
-
 const db = betterSQL("db/veloria.db");
-client.db = db;
 
 client.on("clientReady", async (client) => {
   try {
@@ -44,24 +45,44 @@ client.on("clientReady", async (client) => {
             whitelisted INTEGER NOT NULL DEFAULT 0
         )
     `);
+
+    // Create the bot settings table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS bot (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         logEnabled INTEGER NOT NULL DEFAULT 0,
+         logWebhook VARCHAR(2083)
+      )
+    `);
   } catch (error) {
     console.error(error);
   }
 
   console.info(`V     Ready - ${client.user.username}`);
+  sendAction("CLIENT_READY", "Veloria is ready.");
 });
 
 client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  sendAction(
+    "BOT_READ_MESSAGE",
+    `@ ${message.author}\n\'#\ ${message.channel}`,
+  );
   const prefix = "v?";
   if (!message.content.startsWith(prefix)) return;
   if (!message.guildId) return message.reply(":x: )- Disabled in DM's");
 
   const guild = message.guild;
+  const client = message.client;
   const ap = message.content.substring(prefix.length).trim();
   if (ap.length === 0) return;
   const command = ap.split(" ")[0].toLowerCase();
 
   console.info(`V     Command used ${command}`);
+  sendAction(
+    "BOT_READ_COMMAND",
+    `@ ${message.author}\n\'#\ ${message.channel}\nV? ${command}\n() ${JSON.stringify(getArguments(message.content))}`,
+  );
 
   /**
    * Expected: One(UID) - One(TOF)
@@ -88,6 +109,52 @@ client.on("messageCreate", async (message) => {
     return message.reply(
       `+ )- <@${args.uid[0]}> is now ${Boolean(args.tof[0]) ? "whitelistted" : "blacklisted"}`,
     );
+  }
+
+  /**
+   * Expected: CID(1!) & TOF(?=1)
+   * CID: The channel to create the webhook in.
+   * TOF: To enable logging or not to. (Default true)
+   */
+  if (command === "setlog") {
+    const data = findOrInsertUser(message.author.id);
+    if (!data.whitelisted)
+      return message.reply(":x: )- You can't use this command.");
+
+    const args = getArguments(message.content);
+    let enable = true;
+    if (!args.cid[0]) return message.reply(`:x: )- CID(1!)`);
+    if (args.tof[0] === 0) enable = false;
+
+    const msg = await message.channel.send("Editing database...");
+    let webhook;
+
+    if (enable) {
+      await msg.edit("Creating webhook...");
+      const channel = await guild.channels.fetch(args.cid[0]);
+      if (!channel) return msg.edit(`:x: )- Target channel not found`);
+
+      webhook = await channel
+        .createWebhook({ name: "Veloria Logs", reason: "Command used." })
+        .catch(console.error);
+    }
+
+    db.prepare(
+      "INSERT OR REPLACE INTO bot (id, logEnabled, logWebhook) VALUES (?, ?, ?)",
+    ).run(client.user.id, enable ? 1 : 0, enable ? webhook.url : "");
+
+    const presistent = `${enable ? `Enabled logging at ${args.cid[0]} using webhook ${webhook.id}` : "Disabled logs"}`;
+
+    if (enable) {
+      msg.edit(`${presistent}\n- Sending a message using webhook.`);
+
+      webhook.send(
+        `Enabled, Veloria will now start logging any activities, actions or button clicks.`,
+      );
+      return msg.edit(`${presistent}\n- Message sent.`);
+    }
+
+    return msg.edit(presistent);
   }
 
   /**
@@ -162,10 +229,39 @@ client.on("messageCreate", async (message) => {
       files: [attachment],
     });
   }
+
+  /**
+   * Expected: UID(!1)
+   * UID: The user settings to pull.
+   */
+  if (command === "getsettingsfor") {
+    const args = getArguments(message.content);
+    if (!args.uid[0]) return message.reply(":x: )- CID(!1)");
+
+    const data = findOrInsertUser(args.uid[0]);
+    const embed = new EmbedBuilder()
+      .setDescription(
+        `
+      ${codeBlock(`SELECT * FROM users WHERE id = ${args.uid[0]}`)}
+      \n\n
+      ${codeBlock(`{ id: "${data.id}", whitelisted: "${data.whitelisted}" }`)}
+      `,
+      )
+      .setColor("2C2F33");
+
+    return message.reply({
+      embeds: [embed],
+    });
+  }
 });
 
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isButton()) {
+    sendAction(
+      "INTERACTION_BUTTON_CLICK_HANDLE",
+      `@ ${interaction.user}\n\'#\ ${interaction.channel}\n(*) ${interaction.customId}`,
+    );
+
     if (interaction.customId === "info-rules") {
       const embed = new EmbedBuilder()
         .setTitle("<:guidelines_tts:1448672796707389482> Policies & Rules")
@@ -191,6 +287,11 @@ client.on("interactionCreate", async (interaction) => {
   }
 
   if (interaction.isStringSelectMenu()) {
+    sendAction(
+      "INTERACTION_STRING_SELECT_HANDLE",
+      `@ ${interaction.user}\n\'#\ ${interaction.channel}\n(*) ${interaction.customId}\n(*v) ${JSON.stringify(interaction.values)}`,
+    );
+
     if (interaction.customId === "info-select") {
       const selected = interaction.values[0];
 
@@ -288,6 +389,27 @@ function findOrInsertUser(userId, optionals = { whitelisted: 0 }) {
   });
 
   return transaction();
+}
+
+/**
+ * Send an action log.
+ */
+function sendAction(ACTION_TYPE, DESCRIPTION) {
+  const data = db.prepare("SELECT * FROM bot WHERE id = ?").get(clientId);
+
+  if (!data) return;
+  if (!data.logEnabled) return;
+
+  const webhook = new WebhookClient({ url: data.logWebhook });
+  if (!webhook) return;
+
+  const embed = new EmbedBuilder()
+    .setTitle(ACTION_TYPE)
+    .setDescription(DESCRIPTION)
+    .setColor("Orange")
+    .setTimestamp();
+
+  return webhook.send({ embeds: [embed] });
 }
 
 process.on("uncaughtException", (error, origin) => {
