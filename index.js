@@ -17,6 +17,7 @@ const betterSQL = require("better-sqlite3");
 const { rules } = require("./files/rules-content");
 const { guide } = require("./files/guide-content");
 const { perks } = require("./files/level-perks");
+const { JsonDB, Config } = require("node-json-db");
 
 // Load Environment file.
 process.loadEnvFile(".env");
@@ -32,7 +33,15 @@ const client = new Client({
 
 const clientId = "1448012671726125117";
 const owners = ["1143607268781342893"];
+
+/**
+ * Slowly changing the database from
+ * BetterSQL to JsonDB
+ * To keep a presistent database across development
+ * and production processees.
+ */
 const db = betterSQL("db/veloria.db");
+const jdb = new JsonDB(new Config("db/jdb", true, false, "/", true))
 
 client.on("clientReady", async (client) => {
   try {
@@ -109,6 +118,42 @@ client.on("messageCreate", async (message) => {
     return message.reply(
       `+ )- <@${args.uid[0]}> is now ${Boolean(args.tof[0]) ? "whitelistted" : "blacklisted"}`,
     );
+  }
+
+  /**
+   * Expected: CID(1!) & TOF(?=1)
+   * CID: The channel for counting.
+   * TOF: If counting is enabled.
+   */
+  if (command === "setcounting") {
+    const data = findOrInsertUser(message.author.id);
+    if (!data.whitelisted)
+      return message.reply(":x: )- You can't use this command.");
+    
+    const args = getArguments(message.content);
+    let enable = true;
+    if (!args.cid[0]) return message.reply(":x: )- CID(1!)");
+    if (args.tof[0] === 0) enable = false;
+
+    const channel = await guild.channels.fetch(args.cid[0]);
+    if (!channel) return message.reply(":x: )- Channel not found.");
+
+    jdb.push("/counting/enabled", enable);
+    jdb.push("/counting/channel", channel.id);
+    jdb.push("/counting/count", 0);
+    jdb.push("/counting/previous/message", "");
+    jdb.push("/counting/previous/user", clientId);
+
+    message.reply(`Set ${channel} as the counting channel.`);
+
+    const starting = new EmbedBuilder()
+    .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL() })
+    .setTitle("Counting!")
+    .setDescription(`Time to count! Start from **1** to Infinity!`)
+    .setColor("Blurple")
+    .setTimestamp();
+
+    return channel.send({ embeds: [starting] });
   }
 
   /**
@@ -252,6 +297,47 @@ client.on("messageCreate", async (message) => {
     return message.reply({
       embeds: [embed],
     });
+  }
+});
+
+// Counting logic
+client.on("messageCreate", async (message) => {
+  const data = await jdb.getObject("/counting");
+
+  if (!data.enabled) return;
+  if (message.channel.id != data.channel) return;
+
+  if (message.author.id === clientId) return;
+  if (!Number(message.content)) return message.delete();
+
+
+  const current = data.count;
+  const next = current + 1;
+
+  if (Number(message.content) === next) {
+    if (data.previous.user === message.author.id) {
+      await message.delete();
+      const msg = await message.channel.send(`:x: )- ${message.author} You get only one chance to count! Wait till someone else counts!`);
+      await sleep(5_000);
+      return await msg.delete();
+    }
+
+    await jdb.push("/counting/count", next);
+
+    message.react({ id: "1449052599654547518" });
+    
+    if (data.previous) {
+      const prev = await message.channel.messages.fetch(data.previous);
+
+      if (prev) 
+        prev.delete();
+    }
+
+    const prev = await message.channel.send(`${message.author} counted **${next}**!`);
+    await jdb.push("/counting/previous/message", prev.id);
+    await jdb.push("/counting/previous/user", message.author.id)
+  } else {
+    await message.delete();
   }
 });
 
@@ -410,6 +496,14 @@ function sendAction(ACTION_TYPE, DESCRIPTION) {
     .setTimestamp();
 
   return webhook.send({ embeds: [embed] });
+}
+
+/**
+ * Pauses execution for a specified number of milliseconds.
+ * @param {number} ms - The number of milliseconds to sleep.
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 process.on("uncaughtException", (error, origin) => {
