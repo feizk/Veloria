@@ -414,14 +414,17 @@ function sendAction(ACTION_TYPE, DESCRIPTION) {
 
 process.on("uncaughtException", (error, origin) => {
   console.error(error, origin);
+  sendAction("BOT_PROCESS_UNCAUGHT_EXPECTION", `${error}`);
 });
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error(reason, promise);
+  sendAction("BOT_PROCESS_UNHANDLED_REJECTION", `${reason}`);
 });
 
 client.on("error", (error) => {
   console.error(error);
+  sendAction("BOT_DISCORD-JS_ERROR", `${error}`);
 });
 
 client.login(process.env.TOKEN);
