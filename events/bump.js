@@ -30,7 +30,7 @@ module.exports = {
 
       const bembed = new EmbedBuilder()
         .setAuthor({
-          name: message.author.name,
+          name: message.author.username,
           iconURL: message.author.displayAvatarURL(),
         })
         .setDescription(
