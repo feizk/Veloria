@@ -4,3 +4,4 @@ package-lock.json
 db/veloria.db
 db/veloria.db-shm
 db/veloria.db-wal
+_old.js
