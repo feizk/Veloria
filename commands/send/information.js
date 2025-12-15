@@ -76,7 +76,7 @@ module.exports = async (message) => {
       ),
   );
 
-  const channel = await guild.channels.fetch(channelId);
+  const channel = await message.guild.channels.fetch(channelId);
   if (!channel)
     message.reply(":x: | Argument channel, actual channel not found.");
 
