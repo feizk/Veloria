@@ -38,6 +38,10 @@ module.exports = {
         require("../commands/counting/count.js")(message);
       }
 
+      if (command === "logs-enable") {
+        require("../commands/logs/enable.js")(message);
+      }
+
       if (command === "bump-channel") {
         require("../commands/bump-channel.js")(message);
       }
