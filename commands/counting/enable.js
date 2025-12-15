@@ -18,7 +18,7 @@ module.exports = async (message) => {
   const channel = args.result.channel.at(0);
 
   // If argument not provided
-  if (!status) return message.react(PRESETS.REQUIRED_ARGS_UNDEFINED);
+  if (!status) return message.reply(PRESETS.REQUIRED_ARGS_UNDEFINED);
   // If status is truthy but channel argument is not provided
   if (status.value && !channel)
     return message.reply(
