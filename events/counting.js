@@ -30,7 +30,7 @@ module.exports = {
     const next = current + 1;
 
     if (Number(message.content) === next) {
-      if (data.counting.previous.user === message.author.id) {
+      if (!users.includes(message.author.id) && data.counting.previous.user === message.author.id) {
         await message.delete();
         const msg = await message.channel.send(
           `:x: | ${message.author} you can only count once at a time!`,
