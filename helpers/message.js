@@ -3,9 +3,9 @@ const Guild = require("../models/Guild");
 
 /**
  * @param {import("discord.js").Guild} guild
- * @param {Object} param1 
- * @param {string} param1.action 
- * @param {string} param1.extra 
+ * @param {Object} param1
+ * @param {string} param1.action
+ * @param {string} param1.extra
  * @param {string} param1.footer
  */
 async function sendLog(guild, { action, extra, footer = "$" }) {
@@ -14,17 +14,18 @@ async function sendLog(guild, { action, extra, footer = "$" }) {
   if (!data.bot_logs.enabled) return;
 
   let valid = true;
-  const channel = await guild.channels.fetch(data.bot_logs.channel)
-  .catch(() => valid = false);
+  const channel = await guild.channels
+    .fetch(data.bot_logs.channel)
+    .catch(() => (valid = false));
 
   if (!valid) return;
 
   const embed = new EmbedBuilder()
-  .setAuthor({ name: guild.name, iconURL: guild.iconURL() })
-  .setDescription(`ACTION-${action}\n${extra}`)
-  .setFooter({ text: footer })
-  .setTimestamp()
-  .setColor("Blurple")
+    .setAuthor({ name: guild.name, iconURL: guild.iconURL() })
+    .setDescription(`ACTION-${action}\n${extra}`)
+    .setFooter({ text: footer })
+    .setTimestamp()
+    .setColor("Blurple");
 
   channel.send({ embeds: [embed] });
 }
@@ -181,5 +182,5 @@ function getArgs(message) {
 module.exports = {
   validateID,
   getArgs,
-  sendLog
+  sendLog,
 };
