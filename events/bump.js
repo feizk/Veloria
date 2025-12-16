@@ -43,6 +43,7 @@ module.exports = {
       return message.channel.send({
         content: user.toString(),
         embeds: [bembed],
+        allowedMentions: { parse: ["users", "roles"] }
       });
     } catch (error) {
       console.error(`ERROR`, error);

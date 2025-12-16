@@ -14,15 +14,18 @@ module.exports = {
 
       for (const due of dues) {
         due.next_bump = null;
-        await due.save(); 
-        
+        await due.save();
+
         const guild = await client.guilds.fetch(due.id);
         if (!guild) return;
 
         const channel = await guild.channels.fetch(due.bump_channel);
         if (!channel) return;
-        
-        channel.send(`${config.bumpRemindRole} | Time to bump the server! Use /bump`);
+
+        channel.send({
+          content: `${config.bumpRemindRole} | Time to bump the server! Use /bump`,
+          allowedMentions: { parse: ["roles", "users"] }
+      });
       }
     }, 60 * 1000);
   },
