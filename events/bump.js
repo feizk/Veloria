@@ -23,6 +23,7 @@ module.exports = {
       if (!guildData.bump_channel) return;
       if (message.channelId != guildData.bump_channel) return;
 
+      const user = message.interactionMetadata.user;
       const nextBumpAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
       guildData.next_bump = nextBumpAt;
@@ -30,8 +31,8 @@ module.exports = {
 
       const bembed = new EmbedBuilder()
         .setAuthor({
-          name: message.author.username,
-          iconURL: message.author.displayAvatarURL(),
+          name: user.username,
+          iconURL: user.displayAvatarURL(),
         })
         .setDescription(
           `**Thank you for bumping!**\n- I will remind to bump in 2 hours`,
@@ -40,7 +41,7 @@ module.exports = {
         .setColor("Blurple");
 
       return message.channel.send({
-        content: message.author.toString(),
+        content: user.toString(),
         embeds: [bembed],
       });
     } catch (error) {
