@@ -13,18 +13,16 @@ module.exports = {
       const dues = await Guild.find({ next_bump: { $lte: new Date() } });
 
       for (const due of dues) {
-        const channel = client.channels
-          .fetch(due.bump_channel)
-          .catch(() => null);
-
-        if (channel) {
-          channel.send(
-            `${config.bumpRemindRole} | Time to bump the server! Use /bump`,
-          );
-        }
-
         due.next_bump = null;
-        await due.save();
+        await due.save(); 
+        
+        const guild = await client.guilds.fetch(due.id);
+        if (!guild) return;
+
+        const channel = await guild.channels.fetch(due.bump_channel);
+        if (!channel) return;
+        
+        channel.send(`${config.bumpRemindRole} | Time to bump the server! Use /bump`);
       }
     }, 60 * 1000);
   },
