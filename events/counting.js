@@ -30,7 +30,10 @@ module.exports = {
     const next = current + 1;
 
     if (Number(message.content) === next) {
-      if (!users.includes(message.author.id) && data.counting.previous.user === message.author.id) {
+      if (
+        !users.includes(message.author.id) &&
+        data.counting.previous.user === message.author.id
+      ) {
         await message.delete();
         const msg = await message.channel.send(
           `:x: | ${message.author} you can only count once at a time!`,
@@ -42,22 +45,19 @@ module.exports = {
       await message.react(config.counting_success);
 
       if (data.counting.previous.message) {
-        const p_message = await message.channel.messages.fetch(
-          data.counting.previous.message,
-        );
+        let valid = true;
+        const p_message = await message.channel.messages
+          .fetch(data.counting.previous.message)
+          .catch(() => (valid = false));
 
-        if (p_message) await p_message.delete();
+        if (valid) await p_message.delete();
       }
 
-      const nmsg = await message.channel.send(
-        `${message.author.username} has counted to **${next}**`,
-      );
-
-      data.counting.count = next;
-      data.counting.previous.user = message.author.id;
-      data.counting.previous.message = nmsg.id;
-
       try {
+        data.counting.count = next;
+        data.counting.previous.user = message.author.id;
+        data.counting.previous.message = nmsg.id;
+
         await data.save();
       } catch (error) {
         console.error("ERROR", error);
