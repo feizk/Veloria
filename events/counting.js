@@ -42,23 +42,12 @@ module.exports = {
         return await msg.delete();
       }
 
-      await message.react(config.counting_success);
-
-      if (data.counting.previous.message) {
-        let valid = true;
-        const p_message = await message.channel.messages
-          .fetch(data.counting.previous.message)
-          .catch(() => (valid = false));
-
-        if (valid) await p_message.delete();
-      }
-
       try {
         data.counting.count = next;
         data.counting.previous.user = message.author.id;
-        data.counting.previous.message = nmsg.id;
-
         await data.save();
+
+        await message.react(config.counting_success);
       } catch (error) {
         console.error("ERROR", error);
       }
