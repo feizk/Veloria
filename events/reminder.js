@@ -24,8 +24,8 @@ module.exports = {
 
         channel.send({
           content: `${config.bumpRemindRole} | Time to bump the server! Use /bump`,
-          allowedMentions: { parse: ["roles", "users"] }
-      });
+          allowedMentions: { parse: ["roles", "users"] },
+        });
       }
     }, 60 * 1000);
   },
