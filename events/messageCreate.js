@@ -11,6 +11,31 @@ module.exports = {
     // Ignore bot commands
     if (message.author.bot) return;
 
+    if (message.reference?.messageId) {
+      const replied = await message.fetchReference().catch(() => null);
+
+      if (replied) {
+        const embed = replied.embeds.at(0);
+
+        if (embed && embed.data.footer.text.includes("trivia")) {
+          const encoded = embed.data.description;
+          const decoded = Buffer.from(encoded, "base64").toString("utf-8");
+          const correct = decoded.split(";").at(0).toString();
+          const incorrects = decoded.split(";").at(1).split(",");
+
+          if (message.content.toLowerCase() === correct.toLowerCase()) {
+            return message.reply(`Correct! "${correct}" is the answer!`);
+          }
+
+          if (incorrects.includes(message.content.toLowerCase())) {
+            return message.reply(`Wrong, but close!`);
+          }
+
+          return message.react("❌");
+        }
+      }
+    }
+
     if (message.content.startsWith(config.prefix)) {
       // Command's can't be used in guilds
       if (!message.inGuild()) return;
@@ -44,6 +69,10 @@ module.exports = {
 
       if (command === "bump-channel") {
         require("../commands/bump-channel.js")(message);
+      }
+
+      if (command === "trivia") {
+        require("../commands/trivia.js")(message);
       }
     }
   },
