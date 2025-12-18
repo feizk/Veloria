@@ -1,5 +1,6 @@
-const { Events } = require("discord.js");
+const { Events, EmbedBuilder } = require("discord.js");
 const config = require("../config");
+const { normalize, matchScore } = require("../helpers/utils.js");
 
 module.exports = {
   name: Events.MessageCreate,
@@ -12,26 +13,65 @@ module.exports = {
     if (message.author.bot) return;
 
     if (message.reference?.messageId) {
+      const _COLOR = 0x2ecc71;
       const replied = await message.fetchReference().catch(() => null);
 
       if (replied) {
         const embed = replied.embeds.at(0);
 
-        if (embed && embed.data.footer.text.includes("trivia")) {
+        if (embed && embed.data?.footer?.text.includes("trivia")) {
+          if (embed.data?.color === _COLOR) return;
+          // ^ Already answered
+
           const encoded = embed.data.description;
           const decoded = Buffer.from(encoded, "base64").toString("utf-8");
           const correct = decoded.split(";").at(0).toString();
           const incorrects = decoded.split(";").at(1).split(",");
 
-          if (message.content.toLowerCase() === correct.toLowerCase()) {
-            return message.reply(`Correct! "${correct}" is the answer!`);
+          const normalizedInput = normalize(message.content);
+          const normalizedIncorrect = incorrects.map(normalize);
+          const normalizedCorrect = normalize(correct);
+          const partial =
+            normalizedInput.length >= 4 &&
+            normalizedCorrect.includes(normalizedInput);
+          const isCorrect =
+            partial || matchScore(normalizedInput, normalizedCorrect) >= 0.6;
+
+          if (isCorrect) {
+            if (replied.editable) {
+              const nEmbed = EmbedBuilder.from(embed)
+                .setDescription(
+                  `✨ | Answered By; ${message.author}\n- Try again, use "v?trivia"`,
+                )
+                .setColor(_COLOR)
+                .setTimestamp();
+
+              await replied.edit({ embeds: [nEmbed] });
+            }
+
+            return message.reply(
+              `${message.author} you are correct!\n- "**${correct}**" is the full correct answer!`,
+            );
           }
 
-          if (incorrects.includes(message.content.toLowerCase())) {
-            return message.reply(`Wrong, but close!`);
+          const pickedWrongOption = normalizedIncorrect.includes(normalizedInput);
+          const overlapScore = matchScore(normalizedCorrect, normalizedInput);
+          const closeToCorrect = overlapScore >= 0.5 && overlapScore < 1;
+
+          if (pickedWrongOption) {
+            await message.react("❌");
+            return message.reply(
+              `:x: | That's one of the options, but the wrong one!`,
+            );
           }
 
-          return message.react("❌");
+          if (closeToCorrect) {
+            await message.react("❌");
+            return message.reply(":x: | Very close!");
+          }
+
+          await message.react("❌");
+          return message.reply(":x: | Incorrect!");
         }
       }
     }

@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const he = require("he");
+const { shuffle } = require("../helpers/utils");
 
 /**
  * @param {import("discord.js").Message} message
@@ -13,10 +14,11 @@ module.exports = async (message) => {
     if (!json) return message.reply(":x: | API error (j)");
 
     const result = json.results[0];
+    const type = result.type;
     const question = he.decode(result.question);
-    const correct = result.correct_answer;
-    const incorrects = result.incorrect_answers;
-    const category = result.category;
+    const correct = he.decode(result.correct_answer);
+    const incorrects = result.incorrect_answers.map((i) => he.decode(i));
+    const category = he.decode(result.category);
 
     // [0=ans];[1=inc]
     const encoded = Buffer.from(`${correct};${incorrects.join(",")}`).toString(
@@ -24,14 +26,24 @@ module.exports = async (message) => {
     );
 
     const embed = new EmbedBuilder()
-      .setTitle(`Category: ${category}`)
+      .setTitle(`${category}`)
       .setDescription(`${encoded}`)
       .addFields({ name: "Question", value: question })
       .setColor("Blurple")
-      .setFooter({ text: "trivia - opentdb" });
+      .setFooter({ text: `trivia - opentdb / ${type}` });
+
+    if (type === "multiple") {
+      const choices = [...incorrects, correct];
+
+      embed.addFields({
+        name: "Choices",
+        value: `- ${shuffle(choices).join("\n- ")}`,
+      });
+    }
 
     return message.reply({ embeds: [embed] });
   } catch (error) {
     console.error(error);
+    message.reply(`Error ${error}`);
   }
 };
