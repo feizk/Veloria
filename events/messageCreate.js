@@ -54,7 +54,8 @@ module.exports = {
             );
           }
 
-          const pickedWrongOption = normalizedIncorrect.includes(normalizedInput);
+          const pickedWrongOption =
+            normalizedIncorrect.includes(normalizedInput);
           const overlapScore = matchScore(normalizedCorrect, normalizedInput);
           const closeToCorrect = overlapScore >= 0.5 && overlapScore < 1;
 
