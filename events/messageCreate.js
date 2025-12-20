@@ -13,14 +13,19 @@ module.exports = {
     if (message.author.bot) return;
 
     if (message.reference?.messageId) {
-      const _COLOR = 0x2ecc71;
+      const CORRECT_COLOR = 0x2ecc71;
+      const INCORRECT_COLOR = 0xe74c3c;
       const replied = await message.fetchReference().catch(() => null);
 
       if (replied) {
         const embed = replied.embeds.at(0);
 
         if (embed && embed.data?.footer?.text.includes("trivia")) {
-          if (embed.data?.color === _COLOR) return;
+          if (
+            embed.data?.color === CORRECT_COLOR ||
+            embed.data?.color === INCORRECT_COLOR
+          )
+            return;
           // ^ Already answered
 
           const encoded = embed.data.description;
@@ -43,7 +48,7 @@ module.exports = {
                 .setDescription(
                   `✨ | Answered By; ${message.author}\n- Try again, use "v?trivia"`,
                 )
-                .setColor(_COLOR)
+                .setColor(CORRECT_COLOR)
                 .setTimestamp();
 
               await replied.edit({ embeds: [nEmbed] });
@@ -54,25 +59,16 @@ module.exports = {
             );
           }
 
-          const pickedWrongOption =
-            normalizedIncorrect.includes(normalizedInput);
-          const overlapScore = matchScore(normalizedCorrect, normalizedInput);
-          const closeToCorrect = overlapScore >= 0.5 && overlapScore < 1;
+          if (replied.editable) {
+            const nEmbed = EmbedBuilder.from(embed)
+              .setDescription(`🔂 | You got the wrong answer!`)
+              .setColor(INCORRECT_COLOR)
+              .setTimestamp();
 
-          if (pickedWrongOption) {
-            await message.react("❌");
-            return message.reply(
-              `:x: | That's one of the options, but the wrong one!`,
-            );
+            await replied.edit({ embeds: [nEmbed] });
           }
 
-          if (closeToCorrect) {
-            await message.react("❌");
-            return message.reply(":x: | Very close!");
-          }
-
-          await message.react("❌");
-          return message.reply(":x: | Incorrect!");
+          return message.reply(":x: | Incorrect, you get one chance to try!");
         }
       }
     }
