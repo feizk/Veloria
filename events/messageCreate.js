@@ -1,6 +1,11 @@
 const { Events, EmbedBuilder } = require("discord.js");
 const config = require("../config");
-const { normalize, matchScore } = require("../helpers/utils.js");
+const {
+  normalize,
+  matchScore,
+  calculateScore,
+  getRandomInt,
+} = require("../helpers/utils.js");
 const User = require("../models/User.js");
 const Guild = require("../models/Guild.js");
 
@@ -87,7 +92,6 @@ module.exports = {
           const incorrects = decoded.split(";").at(1).split(",");
 
           const normalizedInput = normalize(message.content);
-          const normalizedIncorrect = incorrects.map(normalize);
           const normalizedCorrect = normalize(correct);
           const partial =
             normalizedInput.length >= 4 &&
@@ -107,12 +111,16 @@ module.exports = {
               await replied.edit({ embeds: [nEmbed] });
             }
 
+            const wpoints = calculateScore(normalizedInput, normalizedCorrect);
+
             if (userData) {
-              await userData.updateOne({ $inc: { "trivia.wins": 1 } });
+              await userData.updateOne({
+                $inc: { "trivia.wins": 1, "trivia.score": wpoints },
+              });
             }
 
             return message.reply(
-              `${message.author} you are correct!\n- "**${correct}**" is the full correct answer!`,
+              `${message.author} you are correct. You gained +${wpoints}\n- "**${correct}**" is the full correct answer!`,
             );
           }
 
@@ -125,16 +133,24 @@ module.exports = {
             await replied.edit({ embeds: [nEmbed] });
           }
 
+          const lpoints =
+            calculateScore(normalizedInput, normalizedCorrect) -
+            getRandomInt(10, 15);
+
           if (userData) {
-            await userData.updateOne({ $inc: { "trivia.loss": 1 } });
+            await userData.updateOne({
+              $inc: { "trivia.loss": 1, "trivia.score": -lpoints },
+            });
           }
 
-          return message.reply(":x: | Incorrect, you get one chance to try!");
+          return message.reply(
+            `:x: | Incorrect. You lost **-${lpoints}** points`,
+          );
         }
       }
     }
 
-    // Commands 
+    // Commands
     if (message.content.startsWith(config.prefix)) {
       // Command's can't be used in guilds
       if (!message.inGuild()) return;

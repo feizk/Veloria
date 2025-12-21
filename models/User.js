@@ -14,6 +14,7 @@ const User = new Schema({
 
   trivia: {
     played: Number,
+    score: Number,
     wins: Number,
     loss: Number,
   },
