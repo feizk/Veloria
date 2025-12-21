@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder } = require("discord.js");
 const config = require("../config");
 const { normalize, matchScore } = require("../helpers/utils.js");
+const User = require("../models/User.js");
 
 module.exports = {
   name: Events.MessageCreate,
@@ -28,6 +29,12 @@ module.exports = {
             return;
           // ^ Already answered
 
+          let userData = await User.findOne({ id: message.author.id });
+          if (!userData) userData = await User.create({ id: message.author.id });
+          if (userData) {
+            await userData.updateOne({ $inc: { "trivia.played": 1 } });
+          }
+
           const encoded = embed.data.description;
           const decoded = Buffer.from(encoded, "base64").toString("utf-8");
           const correct = decoded.split(";").at(0).toString();
@@ -54,6 +61,10 @@ module.exports = {
               await replied.edit({ embeds: [nEmbed] });
             }
 
+            if (userData) {
+              await userData.updateOne({ $inc: { "trivia.wins": 1 } });
+            }
+
             return message.reply(
               `${message.author} you are correct!\n- "**${correct}**" is the full correct answer!`,
             );
@@ -66,6 +77,10 @@ module.exports = {
               .setTimestamp();
 
             await replied.edit({ embeds: [nEmbed] });
+          }
+
+          if (userData) {
+            await userData.updateOne({ $inc: { "trivia.loss": 1 } });
           }
 
           return message.reply(":x: | Incorrect, you get one chance to try!");

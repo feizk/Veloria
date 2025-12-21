@@ -3,6 +3,7 @@ const he = require("he");
 const { shuffle } = require("../helpers/utils");
 const { getArgs } = require("../helpers/message");
 const opentdb = require("../files/content/opentdb-data.json");
+const User = require("../models/User");
 
 /**
  * @param {import("discord.js").Message} message
@@ -83,6 +84,14 @@ module.exports = async (message) => {
         name: "Choices",
         value: `- ${shuffle(choices).join("\n- ")}`,
       });
+    }
+
+    const userData = await User.findOne({ id: message.author.id });
+
+    if (userData) {
+      await userData.updateOne({ $inc: { "trivia.played": 1 } });
+    } else {
+      await User.create({ id: message.author.id, "trivia.played": 1 });
     }
 
     return message.reply({ embeds: [embed] });
