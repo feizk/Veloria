@@ -4,6 +4,10 @@ const User = require("../models/User");
 const { sleep } = require("../helpers/utils");
 const config = require("../config");
 
+/**
+ * Counting increment logic
+ */
+
 module.exports = {
   name: Events.MessageCreate,
 
