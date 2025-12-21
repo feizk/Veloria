@@ -6,6 +6,15 @@ const Guild = new Schema({
     required: true,
   },
 
+  leaderboard: {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
+
+    channelId: String,
+  },
+
   counting: {
     enabled: {
       type: Boolean,

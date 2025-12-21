@@ -15,8 +15,8 @@ const User = new Schema({
   trivia: {
     played: Number,
     wins: Number,
-    loss: Number
-  }
+    loss: Number,
+  },
 });
 
 module.exports = model("User", User);
