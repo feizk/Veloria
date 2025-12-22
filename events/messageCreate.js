@@ -171,10 +171,12 @@ module.exports = {
 
       try {
         let fullPath = "../commands";
+        const parts = command.split("-");
+        const base = parts[0];
+        const sub = parts[1];
 
-        for (const path of command.split("-")) {
-          fullPath += `/${path}`;
-        }
+        if (!sub) fullPath += `/${base}/index.js`;
+        else fullPath += `/${base}/${sub}.js`;
 
         require(fullPath)(message);
       } catch (error) {
