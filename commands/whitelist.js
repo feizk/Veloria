@@ -33,7 +33,7 @@ module.exports = async (message) => {
         guild: message.guildId,
         whitelisted: boolean,
       });
-      
+
       return message.reply(
         `✅ | Created user document. ${boolean ? "Whitelisted" : "Blacklisted"} user!`,
       );

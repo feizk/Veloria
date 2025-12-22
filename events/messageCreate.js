@@ -79,9 +79,12 @@ module.exports = {
             return;
           // ^ Already answered
 
-          let userData = await User.findOne({ id: message.author.id });
+          let userData = await User.findOne({ id: message.author.id, guild: message.guildId });
           if (!userData)
-            userData = await User.create({ id: message.author.id });
+            userData = await User.create({
+              id: message.author.id,
+              guild: message.guildId,
+            });
           if (userData) {
             await userData.updateOne({ $inc: { "trivia.played": 1 } });
           }

@@ -8,7 +8,10 @@ const User = require("../../models/User");
  * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
-  const userData = await User.findOne({ id: message.author.id });
+  const userData = await User.findOne({
+    id: message.author.id,
+    guild: message.guildId,
+  });
   if (!userData) return message.reply(PRESETS.USER_DATA_UNDEFINED);
   if (!userData.whitelisted) return message.reply(PRESETS.USER_DATA_UNDEFINED);
 
@@ -44,7 +47,7 @@ module.exports = async (message) => {
 
     return message.reply(
       `✅ | Enabled leaderboard. The leaderboard will be sent on the next interval`,
-    )();
+    );
   } catch (error) {
     console.error("ERROR", error);
     message.reply(`Error ${error}`);

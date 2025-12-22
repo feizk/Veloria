@@ -8,7 +8,10 @@ const User = require("../../models/User");
  * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
-  const data = await User.findOne({ id: message.author.id });
+  const data = await User.findOne({
+    id: message.author.id,
+    guild: message.guildId,
+  });
 
   if (!data) return message.reply(PRESETS.USER_DATA_UNDEFINED);
   if (!data.whitelisted) return message.react(PRESETS.NOT_WHITELISTED);
@@ -45,21 +48,32 @@ module.exports = async (message) => {
   }
 
   try {
-    await Guild.findOneAndUpdate(
-      { id: message.guildId },
-      {
+    const guildData = await Guild.findOne({ id: message.guildId });
+
+    if (!guildData) {
+      await Guild.create({
+        id: message.guildId,
         counting: {
           enabled: status.value,
-          count: 0,
           channel: status.value ? channel.value : "",
+          count: 0,
         },
-      },
-      { upsert: true },
-    );
+      });
 
-    if (status.value)
-      return message.reply(`Enabled counting in <#${channel.value}>`);
-    else return message.reply("Disabled counting");
+      return message.reply(
+        `✅ | Created guild document. Saved counting settings`,
+      );
+    }
+
+    await guildData.updateOne({
+      "counting.enabled": status.value,
+      "counting.channel": status.value ? channel.value : "",
+      "counting.count": 0,
+    });
+
+    return message.reply(
+      `✅ | ${status.value ? `Enabled counting. Start counting at <#${channel.value}>` : "Disabled counting"}`,
+    );
   } catch (error) {
     console.error("ERROR", error);
     message.reply(`Error ${error}`);

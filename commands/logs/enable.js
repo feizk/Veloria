@@ -10,7 +10,10 @@ const User = require("../../models/User");
  * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
-  const userData = await User.findOne({ id: message.author.id });
+  const userData = await User.findOne({
+    id: message.author.id,
+    guild: message.guildId,
+  });
   if (!userData) return message.reply(PRESETS.USER_DATA_UNDEFINED);
   if (!userData.whitelisted) return message.reply(PRESETS.NOT_WHITELISTED);
 

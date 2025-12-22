@@ -86,12 +86,19 @@ module.exports = async (message) => {
       });
     }
 
-    const userData = await User.findOne({ id: message.author.id });
+    const userData = await User.findOne({
+      id: message.author.id,
+      guild: message.guildId,
+    });
 
     if (userData) {
       await userData.updateOne({ $inc: { "trivia.played": 1 } });
     } else {
-      await User.create({ id: message.author.id, "trivia.played": 1 });
+      await User.create({
+        id: message.author.id,
+        guild: message.guildId,
+        trivia: { played: 1 },
+      });
     }
 
     return message.reply({ embeds: [embed] });

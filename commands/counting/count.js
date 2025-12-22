@@ -8,8 +8,10 @@ const User = require("../../models/User");
  * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
-  const userData = await User.findOne({ id: message.author.id });
-
+  const userData = await User.findOne({
+    id: message.author.id,
+    guild: message.guildId,
+  });
   if (!userData) return message.reply(PRESETS.USER_DATA_UNDEFINED);
   if (!userData.whitelisted) return message.reply(PRESETS.NOT_WHITELISTED);
 
@@ -22,18 +24,20 @@ module.exports = async (message) => {
 
   try {
     const guildData = await Guild.findOne({ id: message.guildId });
+
     if (!guildData) {
-      await Guild.create({ id: message.guildId });
-      return message.reply(`:x: | Execute this command again`);
+      await Guild.create({ id: message.guildId, counting: { count: number } });
+      return message.reply(
+        `✅ | Created guild document. Saved counting number`,
+      );
     }
 
     if (!guildData.counting.enabled)
       return message.reply(":x: | Counting is disabled");
 
-    guildData.counting.count = number;
-    await guildData.save();
+    await guildData.updateOne({ "counting.count": number });
 
-    message.reply(`✅ | Changed the counting value to ${number}`);
+    return message.reply(`✅ | Changed the counting value to ${number}`);
   } catch (error) {
     console.error("ERROR", error);
     message.reply(`Error ${error}`);
