@@ -23,7 +23,7 @@ module.exports = {
     if (!data.counting.enabled) return;
     if (data.counting.channel != message.channelId) return;
 
-    const users = await User.find({ whitelisted: true }).distinct("id");
+    const users = await User.find({ whitelisted: true }).distinct("id").lean();
 
     if (!users.includes(message.author.id)) {
       if (message.author.id === config.clientId) return;

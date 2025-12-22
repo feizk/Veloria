@@ -79,7 +79,10 @@ module.exports = {
             return;
           // ^ Already answered
 
-          let userData = await User.findOne({ id: message.author.id, guild: message.guildId });
+          let userData = await User.findOne({
+            id: message.author.id,
+            guild: message.guildId,
+          });
           if (!userData)
             userData = await User.create({
               id: message.author.id,
@@ -136,18 +139,19 @@ module.exports = {
             await replied.edit({ embeds: [nEmbed] });
           }
 
-          const lpoints =
-            calculateScore(normalizedInput, normalizedCorrect) -
-            getRandomInt(10, 15);
+          const lpoints = getRandomInt(15, 50);
 
           if (userData) {
             await userData.updateOne({
-              $inc: { "trivia.loss": 1, "trivia.score": -lpoints },
+              $inc: {
+                "trivia.loss": 1,
+                "trivia.score": -lpoints,
+              },
             });
           }
 
           return message.reply(
-            `:x: | Incorrect. You lost **-${lpoints}** points`,
+            `:x: | Incorrect. You lost **${lpoints}** points`,
           );
         }
       }
@@ -169,11 +173,9 @@ module.exports = {
         let fullPath = "../commands";
 
         for (const path of command.split("-")) {
-          console.info(path);
           fullPath += `/${path}`;
         }
 
-        console.info(fullPath);
         require(fullPath)(message);
       } catch (error) {
         console.error("ERROR", error);

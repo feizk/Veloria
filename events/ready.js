@@ -80,8 +80,6 @@ module.exports = {
           embed.setDescription(`Not enough data to display...`);
         }
 
-        console.info(tops);
-
         const ldb = tops
           .map((user, index) => {
             const rank = index + 1;
@@ -94,16 +92,29 @@ module.exports = {
         // No prev messageID
         if (!data.leaderboard.messageId) {
           const msg = await channel.send({ embeds: [embed] });
+
           return await Guild.updateOne(
             { id: guild.id },
-            { leaderboard: { messageId: msg.id } },
+            { "leaderboard.messageId": msg.id },
           );
         }
 
-        const msg = await channel.messages.fetch(data.leaderboard.messageId);
-        if (!msg) return;
+        const msg = await channel.messages
+          .fetch(data.leaderboard.messageId)
+          .catch(() => null);
+
+        // If message was deleted
+        if (!msg) {
+          const msg = await channel.send({ embeds: [embed] });
+
+          return await Guild.updateOne(
+            { id: guild.id },
+            { "leaderboard.messageId": msg.id },
+          );
+        }
+
         return msg.edit({ embeds: [embed] });
       }
-    }, 30 * 1000);
+    }, 60 * 1000 * 5);
   },
 };
