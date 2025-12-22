@@ -1,7 +1,7 @@
-const { getArgs } = require("../helpers/message");
-const { PRESETS } = require("../helpers/replies");
-const Guild = require("../models/Guild");
-const User = require("../models/User");
+const { getArgs } = require("../../helpers/message");
+const { PRESETS } = require("../../helpers/replies");
+const Guild = require("../../models/Guild");
+const User = require("../../models/User");
 
 /**
  * Expected Arguments: boolean(1) / channel(1)
@@ -14,6 +14,7 @@ module.exports = async (message) => {
     id: message.author.id,
     guild: message.guildId,
   });
+
   if (!userData) return message.reply(PRESETS.USER_DATA_UNDEFINED);
   if (!userData.whitelisted) return message.reply(PRESETS.NOT_WHITELISTED);
 
