@@ -16,19 +16,34 @@ module.exports = async (message) => {
   let boolean = args.getBoolean(0)?.value;
 
   if (typeof boolean === "undefined") boolean = true;
-  if (!userId) message.reply(`User argument is required`);
+  if (!userId) message.reply(`❌ | User argument is required`);
 
   const user = await message.guild.members.fetch(userId);
-  if (!user) return message.reply(`- Invalid userId provided`);
+  if (!user) return message.reply(`❌ | Invalid userId provided`);
 
   try {
-    await User.findOneAndUpdate(
-      { id: user.id },
-      { whitelisted: boolean },
-      { upsert: true },
-    );
+    const userData = await User.findOne({
+      id: message.author.id,
+      guild: message.guildId,
+    });
 
-    await message.reply(`${boolean ? "Whitelisted" : "Blacklisted"} ${user}`);
+    if (!userData) {
+      await User.create({
+        id: message.author.id,
+        guild: message.guildId,
+        whitelisted: boolean,
+      });
+      
+      return message.reply(
+        `✅ | Created user document. ${boolean ? "Whitelisted" : "Blacklisted"} user!`,
+      );
+    }
+
+    await userData.updateOne({ whitelisted: boolean });
+
+    return message.reply(
+      `✅ | ${boolean ? "Whitelisted" : "Blacklisted"} ${user}`,
+    );
   } catch (error) {
     console.error("ERROR", error);
     message.reply(`Error ${error}`);
