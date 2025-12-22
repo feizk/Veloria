@@ -13,6 +13,7 @@ const Guild = new Schema({
     },
 
     channelId: String,
+    messageId: String,
   },
 
   counting: {
