@@ -4,7 +4,7 @@ const Guild = require("../../models/Guild");
 const User = require("../../models/User");
 
 /**
- * Expected Arguments:
+ * Expected Arguments; number(1)
  * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
