@@ -1,0 +1,101 @@
+{
+  "ctx": "Only approved, public and finished commands are in this file",
+  "commands": [
+    {
+      "name": "logs-enable",
+      "description": "Enable bot activity logging!",
+      "category": "Admin",
+      "arguments": [
+        {
+          "name": "boolean",
+          "accepted_value": "Either true or false or 1 or 0 (false) [REQUIRED]"
+        },
+        {
+          "name": "channel",
+          "accepted_value": "Discord Text Channel ID [OPTIONAL]"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-enable",
+      "description": "Enable leaderboard to promote engagement!",
+      "category": "Admin",
+      "arguments": [
+        {
+          "name": "boolean",
+          "accepted_value": "Either true or false or 1 or 0 (false) [REQUIRED]"
+        },
+        {
+          "name": "channel",
+          "accepted_value": "Discord Text Channel ID [OPTIONAL]"
+        }
+      ]
+    },
+    {
+      "name": "counting-enable",
+      "description": "Enable counting activity!",
+      "category": "Admin",
+      "arguments": [
+        {
+          "name": "boolean",
+          "accepted_value": "Either true or false or 1 or 0 (false) [REQUIRED]"
+        },
+        {
+          "name": "channel",
+          "accepted_value": "Discord Text Channel ID [OPTIONAL]"
+        }
+      ]
+    },
+    {
+      "name": "counting-count",
+      "description": "Change the active counting number!",
+      "category": "Admin",
+      "arguments": [
+        {
+          "name": "number",
+          "accepted_value": "Any Number [REQUIRED]"
+        }
+      ]
+    },
+    {
+      "name": "bump-enable",
+      "description": "Enable bump reminders!",
+      "category": "Admin",
+      "arguments": [
+        {
+          "name": "channel",
+          "accepted_value": "Discord Text Channel ID [REQUIRED]"
+        },
+        {
+          "name": "boolean",
+          "accepted_value": "Either true or false or 1 or 0 (false) [REQUIRED]"
+        }
+      ]
+    },
+    {
+      "name": "trivia-categories",
+      "category": "Games",
+      "description": "Information on categories available!",
+      "arguments": []
+    },
+    {
+      "name": "trivia",
+      "category": "Games",
+      "description": "Play a game of trivia!",
+      "arguments": [
+        {
+          "name": "category",
+          "accepted_value": "Trivia Categories (To view: **v?trivia category)**"
+        },
+        { "name": "type", "accepted_value": "multiple or boolean" },
+        { "name": "difficulty", "accepted_value": "easy, medium or boolean" }
+      ]
+    }
+  ],
+
+  "categories": [
+    { "name": "Admin", "id": 1 },
+    { "name": "General", "id": 2 },
+    { "name": "Games", "id": 3 }
+  ]
+}

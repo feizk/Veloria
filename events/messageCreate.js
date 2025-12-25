@@ -175,9 +175,10 @@ module.exports = {
         const base = parts[0];
         const sub = parts[1];
 
-        if (!sub) fullPath += `/${base}/index.js`;
-        else fullPath += `/${base}/${sub}.js`;
+        if (sub) fullPath += `/${base}/${sub}.js`;
+        else fullPath += `/${base}/index.js`;
 
+        console.info("INFO Running", fullPath);
         require(fullPath)(message);
       } catch (error) {
         console.error("ERROR", error);
