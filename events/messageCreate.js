@@ -16,6 +16,19 @@ module.exports = {
    * @param {import("discord.js").Message} message
    */
   run: async (message) => {
+    // Message Counting Logic
+    if (!message.author.bot && message.content.length >= 2) {
+      await User.updateOne(
+        {
+          id: message.author.id,
+          guild: message.guildId,
+        },
+        {
+          $inc: { messages: 1 },
+        },
+      ).catch(console.error);
+    }
+
     // Bump Logic
     if (
       message.inGuild() &&
