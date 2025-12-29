@@ -1,46 +1,55 @@
 const {
-  ButtonStyle,
+  AttachmentBuilder,
+  EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
+  ButtonStyle,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  EmbedBuilder,
-  AttachmentBuilder,
 } = require("discord.js");
 const { getArgs } = require("../../helpers/message");
 const { PRESETS } = require("../../helpers/replies");
 const User = require("../../models/User");
 
 /**
+ * Arguments; channel(1)
  * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
-  const userData = await User.findOne({ id: message.author.id });
-  if (!userData) return message.reply(PRESETS.USER_DATA_UNDEFINED);
-
   const args = getArgs(message.content);
-  const channelId = args.result.channel.at(0)?.value;
+  let channelId = args.result.channel?.at(0)?.value;
+  if (!channelId) channelId = message.channel.id;
 
-  if (!channelId) message.reply(":x: | Argument channel is not defined");
+  const userData = await User.findOne({
+    id: message.author.id,
+    guild: message.guildId,
+  });
+
+  if (!userData) {
+    await User.create({ id: message.author.id, guild: message.guildId });
+
+    return message.reply(PRESETS.USER_DATA_UNDEFINED);
+  }
 
   if (!userData.whitelisted) return message.reply(PRESETS.NOT_WHITELISTED);
 
-  // Since the only check needed for this command is checked
-  // Build the message, to send.
+  const channel = await message.guild.channels.fetch(channelId);
+  if (!channel) return message.reply(":x: | Channel not found");
+
   const attachment = new AttachmentBuilder("./files/welcome.png", {
     name: "welcome.png",
   });
 
-  const header_image = new EmbedBuilder()
-    .setImage("attachment://welcome.png")
-    .setColor("2C2F33");
+  const image = new EmbedBuilder()
+    .setColor("Blurple")
+    .setImage("attachment://welcome.png");
 
-  const main_embed = new EmbedBuilder()
+  const embed = new EmbedBuilder()
     .setTitle("Welcome to 𝓥𝓮𝓵𝓸𝓻𝓲𝓪")
     .setDescription(
       "> A warm and friendly community where **everyone is welcome!**\nOur goal is simple: to create a **safe**, **fun space to connect**, relax, and just hang out. Come **share your day**, your hobbies, or just lurk—-we're **happy you're here!** <:Giveaway:1448037405578891355>",
     )
-    .setColor("2C2F33");
+    .setColor("Blurple");
 
   const button_row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -62,11 +71,6 @@ module.exports = async (message) => {
       .setMaxValues(1)
       .addOptions(
         new StringSelectMenuOptionBuilder()
-          .setLabel("Moderation Guide")
-          .setDescription("Information about moderation infractions.")
-          .setEmoji({ id: "1448675316875919466" })
-          .setValue("mod-guide"),
-        new StringSelectMenuOptionBuilder()
           .setLabel("Levels & Perks")
           .setDescription(
             "Information about levels and the perks given by levels.",
@@ -76,12 +80,8 @@ module.exports = async (message) => {
       ),
   );
 
-  const channel = await message.guild.channels.fetch(channelId);
-  if (!channel)
-    message.reply(":x: | Argument channel, actual channel not found.");
-
   return channel.send({
-    embeds: [header_image, main_embed],
+    embeds: [image, embed],
     components: [button_row, select_row],
     files: [attachment],
   });
