@@ -15,16 +15,42 @@ const User = new Schema({
 
   whitelisted: {
     type: Boolean,
-    required: false,
     default: false,
   },
 
   trivia: {
-    played: Number,
-    score: Number,
-    wins: Number,
-    loss: Number,
+    played: {
+      type: Number,
+      default: 0
+    },
+
+    score: {
+      type: Number,
+      default: 50
+    },
+
+    wins: {
+      type: Number,
+      default: 0
+    },
+
+    loss: {
+      type: Number,
+      default: 0
+    },
   },
+
+  // NOTE; Users can gain XP by messaging OR using bot activities
+  // ON-HOLD
+  xp: {
+    type: Number,
+    default: 0
+  }
+}, {
+  timestamps: {
+    createdAt: "created_at",
+    updatedAt: "updated_at"
+  }
 });
 
 module.exports = model("User", User);
