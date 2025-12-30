@@ -18,6 +18,8 @@ module.exports = {
   run: async (message) => {
     // Message Counting Logic
     if (!message.author.bot && message.content.length >= 2) {
+      console.info("INFO Updating message count.");
+
       await User.updateOne(
         {
           id: message.author.id,
@@ -26,6 +28,7 @@ module.exports = {
         {
           $inc: { messages: 1 },
         },
+        { upsert: true }
       ).catch(console.error);
     }
 
