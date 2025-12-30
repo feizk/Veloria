@@ -61,4 +61,5 @@ const User = new Schema(
   },
 );
 
+module.exports.MAX_MESSAGES_COUNT = 1_000_000_000;
 module.exports = model("User", User);
