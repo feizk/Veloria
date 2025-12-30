@@ -28,7 +28,7 @@ module.exports = {
         {
           $inc: { messages: 1 },
         },
-        { upsert: true }
+        { upsert: true },
       ).catch(console.error);
     }
 

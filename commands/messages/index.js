@@ -3,21 +3,21 @@ const User = require("../../models/User");
 
 /**
  * Arguments; user(1)
- * @param {import("discord.js").Message} message 
+ * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
-    const args = getArgs(message.content);
-    let userId = args.result.user?.at(0)?.value;
-    if (!userId) userId = message.author.id;
+  const args = getArgs(message.content);
+  let userId = args.result.user?.at(0)?.value;
+  if (!userId) userId = message.author.id;
 
-    if (!validateID(userId))
-        message.reply(`:x: | Invalid discord user ID`);
+  if (!validateID(userId)) message.reply(`:x: | Invalid discord user ID`);
 
+  let userData = await User.findOne({ id: userId, guild: message.guildId });
+  if (!userData) {
+    userData = await User.create({ id: userId, guild: message.guildId });
+  }
 
-    let userData = await User.findOne({ id: userId, guild: message.guildId });
-    if (!userData) {
-        userData = await User.create({ id: userId, guild: message.guildId });
-    }
-
-    return message.reply(`💬 | <@${userId}> has sent **${userData.messages}** messages in this server!`)
-}
+  return message.reply(
+    `💬 | <@${userId}> has sent **${userData.messages}** messages in this server!`,
+  );
+};
