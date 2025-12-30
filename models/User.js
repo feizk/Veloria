@@ -11,7 +11,6 @@ const User = new Schema(
     guild: {
       type: String,
       required: true,
-      unique: true,
     },
 
     whitelisted: {
