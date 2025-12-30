@@ -5,7 +5,6 @@ const User = new Schema(
     id: {
       type: String,
       required: true,
-      unique: true,
     },
 
     guild: {
