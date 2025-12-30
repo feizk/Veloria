@@ -12,9 +12,10 @@ module.exports = async (message) => {
 
   if (!validateID(userId)) message.reply(`:x: | Invalid discord user ID`);
 
-  let userData = await User.findOne({ id: userId, guild: message.guildId });
+  const userData = await User.findOne({ id: userId, guild: message.guildId });
   if (!userData) {
-    userData = await User.create({ id: userId, guild: message.guildId });
+     await User.create({ id: userId, guild: message.guildId });
+     return message.reply(":x: | Execute this command again")
   }
 
   return message.reply(

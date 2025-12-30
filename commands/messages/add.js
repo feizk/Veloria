@@ -23,9 +23,10 @@ module.exports = async (message) => {
     );
 
   try {
-    let userData = await User.findOne({ id: userId, guild: message.guildId });
+    const userData = await User.findOne({ id: userId, guild: message.guildId });
     if (!userData) {
-      userData = await User.create({ id: userId, guild: message.guildId });
+      await User.create({ id: userId, guild: message.guildId });
+      return message.reply(`:x: | Execute this command again`);
     }
 
     await userData.updateOne({ $inc: { messages: count } });
