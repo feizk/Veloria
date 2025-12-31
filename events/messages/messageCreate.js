@@ -186,7 +186,7 @@ module.exports = {
       const command = msgwp.split(" ")[0].toLowerCase();
 
       try {
-        let fullPath = "../commands";
+        let fullPath = "../../commands";
         const parts = command.split("-");
         const base = parts[0];
         const sub = parts[1];
