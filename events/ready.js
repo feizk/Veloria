@@ -1,6 +1,5 @@
-const { Events, EmbedBuilder } = require("discord.js");
+const { Events } = require("discord.js");
 const Guild = require("../models/Guild");
-const User = require("../models/User");
 const config = require("../config");
 
 module.exports = {
