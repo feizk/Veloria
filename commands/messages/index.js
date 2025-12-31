@@ -14,7 +14,7 @@ module.exports = async (message) => {
 
   const userData = await User.findOne({ id: userId, guild: message.guildId });
   if (!userData) {
-     await User.create({ id: userId, guild: message.guildId });
+    await User.create({ id: userId, guild: message.guildId });
   }
 
   return message.reply(
