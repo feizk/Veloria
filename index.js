@@ -31,19 +31,37 @@ client.on("clientReady", async (client) => {
   console.info("INFO fetching event files...");
   const files = fs.readdirSync("./events/");
 
-  for (const file of files) {
-    const stat = fs.statSync(`./events/${file}`);
-    if (!stat.isFile()) return;
+  for (const content of files) {
+    const stat = fs.statSync(`./events/${content}`);
 
-    const event = require(`./events/${file}`);
+    if (stat.isFile()) {
+      const event = require(`./events/${content}`);
 
-    if (!event.name)
-      return console.warn("WARN missing event#name property in", file);
+      if (!event.name)
+        return console.warn("WARN missing event#name property in", content);
 
-    if (!event.run)
-      return console.warn("WARN missing event#run function in", file);
+      if (!event.run)
+        return console.warn("WARN missing event#run function in", content);
 
-    client.on(event.name, (...args) => event.run(...args));
+      client.on(event.name, (...args) => event.run(...args));
+    } else {
+      const files = fs.readdirSync(`./events/${content}/`);
+
+      for (const file of files) {
+        const stat = fs.statSync(`./events/${content}/${file}`);
+        if (!stat.isFile()) return;
+
+        const event = require(`./events/${content}/${file}`);
+
+        if (!event?.name)
+          return console.warn(`WARN missing event#name in ${content}/${file}`);
+
+        if (!event?.run)
+          return console.warn(`WARN missing event#run in ${content}/${file}`);
+
+        client.on(event.name, (...args) => event.run(...args));
+      }
+    }
   }
 
   console.info("INFO completed reading events");
