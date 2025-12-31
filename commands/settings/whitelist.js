@@ -1,6 +1,6 @@
-const config = require("../config");
-const { getArgs } = require("../helpers/message");
-const User = require("../models/User");
+const config = require("../../config");
+const { getArgs } = require("../../helpers/message");
+const User = require("../../models/User");
 
 /**
  * Expected Arguments: user(1) / boolean(1)
@@ -9,7 +9,11 @@ const User = require("../models/User");
  * @param {import("discord.js").Message} message
  */
 module.exports = async (message) => {
-  if (message.author.id != config.owner) return;
+  if (
+    message.author.id != message.guild.ownerId ||
+    !message.member.permissions.has("Administrator")
+  )
+    return;
 
   const args = getArgs(message.content);
   const userId = args.getUser(0)?.value;
