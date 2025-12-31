@@ -1,6 +1,6 @@
 const { Events } = require("discord.js");
-const { sendLog } = require("../helpers/message");
-const Guild = require("../models/Guild");
+const { sendLog } = require("../../helpers/message");
+const Guild = require("../../models/Guild");
 
 module.exports = {
   name: Events.MessageDelete,

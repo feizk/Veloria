@@ -1,13 +1,13 @@
 const { Events, EmbedBuilder } = require("discord.js");
-const config = require("../config");
+const config = require("../../config");
 const {
   normalize,
   matchScore,
   calculateScore,
   getRandomInt,
-} = require("../helpers/utils.js");
-const User = require("../models/User.js");
-const Guild = require("../models/Guild.js");
+} = require("../../helpers/utils.js");
+const User = require("../../models/User.js");
+const Guild = require("../../models/Guild.js");
 
 module.exports = {
   name: Events.MessageCreate,
