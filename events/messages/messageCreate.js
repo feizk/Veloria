@@ -189,9 +189,16 @@ module.exports = {
         let fullPath = "../../commands";
         const parts = command.split("-");
         const base = parts[0];
-        const sub = parts[1];
+        let leading_path = "";
 
-        if (sub) fullPath += `/${base}/${sub}.js`;
+        if (parts.length > 1) {
+          for (const part of parts.filter((_, i) => i !== 0)) {
+            leading_path += `${part}/`;
+          }
+        }
+
+        if (leading_path)
+          fullPath += `/${base}/${leading_path.slice(0, leading_path.lastIndexOf("/"))}`;
         else fullPath += `/${base}/index.js`;
 
         console.info("INFO Running", fullPath);
