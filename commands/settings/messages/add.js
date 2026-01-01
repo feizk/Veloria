@@ -1,6 +1,6 @@
-const { getArgs, validateID } = require("../../helpers/message");
-const User = require("../../models/User");
-const { MAX_MESSAGES_COUNT } = require("../../models/User");
+const { getArgs, validateID } = require("../../../helpers/message");
+const User = require("../../../models/User");
+const { MAX_MESSAGES_COUNT } = require("../../../models/User");
 
 /**
  * Arguments; user(1) number(1)

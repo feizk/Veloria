@@ -1,7 +1,7 @@
-const { getArgs, validateID } = require("../../helpers/message");
-const { PRESETS } = require("../../helpers/replies");
-const Guild = require("../../models/Guild");
-const User = require("../../models/User");
+const { getArgs, validateID } = require("../../../helpers/message");
+const { PRESETS } = require("../../../helpers/replies");
+const Guild = require("../../../models/Guild");
+const User = require("../../../models/User");
 
 /**
  * Expected Arguments: boolean(1) / channel(1)

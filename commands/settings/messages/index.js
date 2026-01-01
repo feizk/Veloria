@@ -1,5 +1,5 @@
-const { getArgs, validateID } = require("../../helpers/message");
-const User = require("../../models/User");
+const { getArgs, validateID } = require("../../../helpers/message");
+const User = require("../../../models/User");
 
 /**
  * Arguments; user(1)

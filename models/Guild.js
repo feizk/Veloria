@@ -6,6 +6,24 @@ const Guild = new Schema({
     required: true,
   },
 
+  welcome: {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
+
+    channelId: String,
+  },
+
+  goodbye: {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
+
+    channelId: String,
+  },
+
   leaderboard: {
     enabled: {
       type: Boolean,
