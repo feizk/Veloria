@@ -57,6 +57,19 @@ function getArgs(message) {
 
   for (const [index, arg] of args.entries()) {
     const clean = arg.split("(");
+
+    /**
+     * Ignore empty spaces...c
+     * Since a argument is supposed to contain
+     * A name (AKA. type) &
+     * A value
+     * We can know if this iteration does not contain
+     * the required information by checking the length.
+     * If len > 2 valid
+     * if len < 2 not-valid - Continue to the next iteration
+     */
+    if (clean.length <= 1) continue;
+
     const type = clean[0];
     const value = clean[1].replace(")", "");
 
