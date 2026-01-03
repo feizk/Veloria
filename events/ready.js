@@ -11,16 +11,16 @@ module.exports = {
   run: (client) => {
     // Bump remind message
     setInterval(async () => {
-      const dues = await Guild.find({ next_bump: { $lte: new Date() } });
+      const dues = await Guild.find({ "bump.next": { $lte: new Date() } });
 
       for (const due of dues) {
-        due.next_bump = null;
+        due.bump.next = null;
         await due.save();
 
         const guild = await client.guilds.fetch(due.id);
         if (!guild) return;
 
-        const channel = await guild.channels.fetch(due.bump_channel);
+        const channel = await guild.channels.fetch(due.bump.channelId);
         if (!channel) return;
 
         channel.send({

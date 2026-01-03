@@ -60,12 +60,14 @@ const Guild = new Schema({
     channel: String,
   },
 
-  bump_channel: {
-    type: String,
-  },
+  bump: {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
 
-  next_bump: {
-    type: Date,
+    channelId: String,
+    next: Date,
   },
 
   bot_logs: {

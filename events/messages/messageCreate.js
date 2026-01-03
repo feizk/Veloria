@@ -44,13 +44,13 @@ module.exports = {
         try {
           const guildData = await Guild.findOne({ id: message.guildId });
           if (!guildData) return;
-          if (!guildData.bump_channel) return;
-          if (message.channelId != guildData.bump_channel) return;
+          if (!guildData.bump.enabled) return;
+          if (message.channelId != guildData.bump.channelId) return;
 
           const user = message.interactionMetadata.user;
           const nextBumpAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
-          guildData.next_bump = nextBumpAt;
+          guildData.bump.next = nextBumpAt;
           await guildData.save();
 
           const bembed = new EmbedBuilder()
